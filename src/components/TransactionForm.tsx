@@ -2,31 +2,43 @@
 import { useEffect, useState } from "react";
 
 interface Transaction {
-  _id: string;
+  _id: string; // Ensure _id is always a string
   amount: number;
   category: string;
-  description?: string;
   date: string;
+  description?: string;
 }
 
 interface TransactionFormProps {
-  onAddTransaction: (newTransaction: Transaction) => void;
+  transactions: Transaction[];
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>; // ✅ Correct type
   editingTransaction: Transaction | null;
-  onEditTransaction: (updatedTransaction: Transaction) => void;
+  setEditingTransaction: React.Dispatch<
+    React.SetStateAction<Transaction | null>
+  >;
 }
 
+const categories = [
+  "Food",
+  "Transport",
+  "Shopping",
+  "Bills",
+  "Entertainment",
+  "Other",
+];
+
 export default function TransactionForm({
-  onAddTransaction,
+  transactions,
+  setTransactions,
   editingTransaction,
-  onEditTransaction,
+  setEditingTransaction,
 }: TransactionFormProps) {
   const [formData, setFormData] = useState({
     amount: "",
     category: "",
     description: "",
-    date: new Date().toISOString().split("T")[0], // Default to today's date
+    date: new Date().toISOString().split("T")[0],
   });
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (editingTransaction) {
@@ -34,27 +46,43 @@ export default function TransactionForm({
         amount: String(editingTransaction.amount),
         category: editingTransaction.category,
         description: editingTransaction.description || "",
-        date: editingTransaction.date.split("T")[0], // Format date for input
+        date: editingTransaction.date.split("T")[0],
       });
-      setIsEditing(true);
     }
   }, [editingTransaction]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const transactionData: Transaction = {
-      _id: editingTransaction?._id || "",
+    const transactionData = {
       amount: Number(formData.amount),
       category: formData.category,
       description: formData.description,
       date: new Date(formData.date).toISOString(),
     };
 
-    if (isEditing) {
-      await onEditTransaction(transactionData);
-      setIsEditing(false);
+    if (editingTransaction?._id) {
+      // ✅ Update Existing Transaction
+      const updatedTransaction = {
+        id: editingTransaction._id,
+        ...transactionData,
+      };
+
+      const res = await fetch("/api/transactions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedTransaction),
+      });
+
+      if (res.ok) {
+        const updatedData: Transaction = await res.json();
+        setTransactions(
+          transactions.map((t) => (t._id === updatedData._id ? updatedData : t))
+        );
+        setEditingTransaction(null);
+      }
     } else {
+      // ✅ Add New Transaction
       const res = await fetch("/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,15 +91,16 @@ export default function TransactionForm({
 
       if (res.ok) {
         const newTransaction: Transaction = await res.json();
-        onAddTransaction(newTransaction);
+        setTransactions([newTransaction, ...transactions]); // Add to UI
       }
     }
 
+    // ✅ Reset Form after Submission
     setFormData({
       amount: "",
       category: "",
       description: "",
-      date: new Date().toISOString().split("T")[0], // Reset to today's date
+      date: new Date().toISOString().split("T")[0],
     });
   };
 
@@ -81,7 +110,7 @@ export default function TransactionForm({
       className="bg-white p-6 rounded-lg shadow-md w-full max-w-md mx-auto space-y-4"
     >
       <h2 className="text-xl font-semibold text-gray-700 text-center">
-        {isEditing ? "Edit Transaction" : "Add Transaction"}
+        {editingTransaction ? "Edit Transaction" : "Add Transaction"}
       </h2>
 
       <input
@@ -93,14 +122,25 @@ export default function TransactionForm({
         className="w-full p-2 border rounded-lg"
       />
 
-      <input
-        type="text"
-        placeholder="Category"
+      <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+        Category
+      </label>
+      <select
+        id="category"
         value={formData.category}
         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
         required
         className="w-full p-2 border rounded-lg"
-      />
+      >
+        <option value="" disabled>
+          Select Category
+        </option>
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </select>
 
       <input
         type="text"
@@ -128,7 +168,7 @@ export default function TransactionForm({
         type="submit"
         className="w-full bg-blue-500 text-white p-2 rounded-lg"
       >
-        {isEditing ? "Update Transaction" : "Add Transaction"}
+        {editingTransaction ? "Update Transaction" : "Add Transaction"}
       </button>
     </form>
   );

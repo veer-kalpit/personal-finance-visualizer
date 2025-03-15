@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, {  Document } from "mongoose";
 
 export interface ITransaction extends Document {
   amount: number;
@@ -7,9 +7,13 @@ export interface ITransaction extends Document {
   date: Date;
 }
 
-const TransactionSchema = new Schema<ITransaction>({
+const TransactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
-  category: { type: String, required: true },
+  category: {
+    type: String,
+    required: true,
+    enum: ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"],
+  },
   description: { type: String },
   date: { type: Date, required: true, default: Date.now },
 });

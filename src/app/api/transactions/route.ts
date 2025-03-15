@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
     console.log(_id);
     const transaction = new Transaction(transactionData);
     await transaction.save();
-
     return NextResponse.json(transaction, { status: 201 });
   } catch (error) {
     console.error("Error adding transaction:", error);

@@ -1,62 +1,57 @@
-"use client";
-import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
-// Define type for chart data
-interface ChartData {
-  name: string;
-  total: number;
+// Define transaction type
+interface Transaction {
+  _id: string;
+  amount: number;
+  category: string;
+  date: string;
 }
 
-export default function ExpenseChart() {
-  // Explicitly type the state
-  const [data, setData] = useState<ChartData[]>([]);
+interface Props {
+  transactions: Transaction[];
+}
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      const res = await fetch("/api/transactions");
-      const transactions = await res.json();
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#FF4567",
+  "#845EC2",
+];
 
-      const groupedData = transactions.reduce(
-        (
-          acc: Record<string, number>,
-          { date, amount }: { date: string; amount: number }
-        ) => {
-          const month = new Date(date).toLocaleString("default", {
-            month: "short",
-          });
-          acc[month] = (acc[month] || 0) + amount;
-          return acc;
-        },
-        {}
-      );
-
-      setData(
-        Object.entries(groupedData).map(([name, total]) => ({
-          name,
-          total: total as number,
-        }))
-      );
-    };
-
-    fetchTransactions();
-  }, []);
+export default function ExpenseChart({ transactions }: Props) {
+  // Aggregate data by category
+  const data = transactions.reduce<{ name: string; value: number }[]>(
+    (acc, tx) => {
+      const existing = acc.find((d) => d.name === tx.category);
+      if (existing) {
+        existing.value += tx.amount;
+      } else {
+        acc.push({ name: tx.category, value: tx.amount });
+      }
+      return acc;
+    },
+    []
+  );
 
   return (
-    <ResponsiveContainer width="50%" height={300}>
-      <BarChart data={data}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="total" fill="#4F46E5" />
-      </BarChart>
-    </ResponsiveContainer>
+    <PieChart width={400} height={300}>
+      <Pie
+        data={data}
+        cx="50%"
+        cy="50%"
+        outerRadius={80}
+        fill="#8884d8"
+        dataKey="value"
+      >
+        {data.map((_, index) => (
+          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
   );
 }
