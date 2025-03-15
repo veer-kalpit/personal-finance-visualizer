@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 interface Transaction {
-  _id: string; // Ensure _id is always a string
+  _id: string; 
   amount: number;
   category: string;
   date: string;
@@ -11,7 +11,7 @@ interface Transaction {
 
 interface TransactionFormProps {
   transactions: Transaction[];
-  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>; // ✅ Correct type
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   editingTransaction: Transaction | null;
   setEditingTransaction: React.Dispatch<
     React.SetStateAction<Transaction | null>
@@ -62,7 +62,6 @@ export default function TransactionForm({
     };
 
     if (editingTransaction?._id) {
-      // ✅ Update Existing Transaction
       const updatedTransaction = {
         id: editingTransaction._id,
         ...transactionData,
@@ -82,7 +81,6 @@ export default function TransactionForm({
         setEditingTransaction(null);
       }
     } else {
-      // ✅ Add New Transaction
       const res = await fetch("/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,11 +89,10 @@ export default function TransactionForm({
 
       if (res.ok) {
         const newTransaction: Transaction = await res.json();
-        setTransactions([newTransaction, ...transactions]); // Add to UI
+        setTransactions([newTransaction, ...transactions]);
       }
     }
 
-    // ✅ Reset Form after Submission
     setFormData({
       amount: "",
       category: "",
@@ -122,7 +119,10 @@ export default function TransactionForm({
         className="w-full p-2 border rounded-lg"
       />
 
-      <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+      <label
+        htmlFor="category"
+        className="block text-sm font-medium text-gray-700"
+      >
         Category
       </label>
       <select

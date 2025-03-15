@@ -7,7 +7,6 @@ import BudgetChart from "@/components/BudgetChart";
 import SummaryCard from "@/components/SummaryCard";
 import BarChart from "@/components/BarChart";
 
-// ✅ Define Transaction Type
 interface Transaction {
   _id: string;
   amount: number;
@@ -22,11 +21,10 @@ export default function Dashboard() {
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
 
-  const [isClient, setIsClient] = useState(false); // ✅ Fix Hydration Error
+  const [isClient, setIsClient] = useState(false); 
 
-  // ✅ Fetch Transactions after Mounting
   useEffect(() => {
-    setIsClient(true); // Ensure client-side rendering
+    setIsClient(true); 
 
     const fetchTransactions = async () => {
       try {
@@ -42,7 +40,6 @@ export default function Dashboard() {
     fetchTransactions();
   }, []);
 
-  // ✅ Calculate Summary Data
   const totalExpenses = transactions.reduce((sum, tx) => sum + tx.amount, 0);
   const categoryTotals: { [key: string]: number } = {};
   transactions.forEach((tx) => {
@@ -50,7 +47,6 @@ export default function Dashboard() {
       (categoryTotals[tx.category] || 0) + tx.amount;
   });
 
-  // ✅ Sort transactions to get the most recent ones
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 3);
@@ -59,7 +55,6 @@ export default function Dashboard() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
-      {/* ✅ Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
         <SummaryCard title="Total Expenses" value={`₹ ${totalExpenses}`} />
         <SummaryCard
@@ -69,7 +64,6 @@ export default function Dashboard() {
         <SummaryCard title="Total Transactions" value={transactions.length} />
       </div>
 
-      {/* ✅ Recent Transactions */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-2">Recent Transactions</h2>
         <ul className="space-y-2">
@@ -87,7 +81,6 @@ export default function Dashboard() {
         </ul>
       </div>
 
-      {/* ✅ Expense & Budget Charts */}
       {isClient && (
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -110,7 +103,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ✅ Full Transaction List */}
       <TransactionForm
         transactions={transactions}
         setTransactions={setTransactions}

@@ -3,14 +3,12 @@ import { connectDB } from "@/lib/db";
 import { Transaction } from "@/lib/transactions";
 import type { NextRequest } from "next/server";
 
-// ✅ GET: Fetch all transactions
 export async function GET() {
   await connectDB();
   const transactions = await Transaction.find().sort({ date: -1 });
   return NextResponse.json(transactions);
 }
 
-// ✅ POST: Add a new transaction
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
@@ -23,7 +21,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Ensure `_id` is not included (MongoDB will auto-generate it)
     const { _id, ...transactionData } = data;
     console.log(_id);
     const transaction = new Transaction(transactionData);
@@ -38,7 +35,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ✅ PUT: Update a transaction
 export async function PUT(req: NextRequest) {
   try {
     await connectDB();
@@ -72,7 +68,6 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ✅ DELETE: Remove a transaction
 export async function DELETE(req: NextRequest) {
   try {
     await connectDB();

@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Define type for chart data
 interface ChartData {
   name: string;
   total: number;
@@ -38,7 +37,6 @@ export default function ExpenseChart() {
       const res = await fetch("/api/transactions");
       const transactions = await res.json();
 
-      // Group transactions by month
       const groupedData = transactions.reduce(
         (
           acc: Record<string, number>,
@@ -53,7 +51,6 @@ export default function ExpenseChart() {
         {}
       );
 
-      // Ensure all months are included, even if they have 0 expenses
       const completeData = allMonths.map((month) => ({
         name: month,
         total: groupedData[month] || 0,

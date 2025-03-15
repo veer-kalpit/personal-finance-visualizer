@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Define transaction type
 interface Transaction {
   _id: string;
   amount: number;
@@ -16,7 +15,6 @@ interface Transaction {
   date: string;
 }
 
-// Sample budgets (you can replace this with dynamic budgets from MongoDB)
 const budgetData = {
   Food: 5000,
   Transport: 2000,
@@ -31,7 +29,6 @@ interface Props {
 }
 
 export default function BudgetChart({ transactions }: Props) {
-  // Aggregate actual spending by category
   const data = Object.entries(budgetData).map(([category, budget]) => {
     const actual = transactions
       .filter((tx) => tx.category === category)

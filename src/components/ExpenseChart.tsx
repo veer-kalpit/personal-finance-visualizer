@@ -1,6 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
-// Define transaction type
 interface Transaction {
   _id: string;
   amount: number;
@@ -22,7 +21,6 @@ const COLORS = [
 ];
 
 export default function ExpenseChart({ transactions }: Props) {
-  // Aggregate data by category
   const data = transactions.reduce<{ name: string; value: number }[]>(
     (acc, tx) => {
       const existing = acc.find((d) => d.name === tx.category);
