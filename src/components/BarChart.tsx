@@ -32,9 +32,10 @@ const allMonths = [
 export default function ExpenseChart() {
   const [data, setData] = useState<ChartData[]>([]);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
+  const fetchTransactions = async () => {
+    try {
       const res = await fetch("/api/transactions");
+      if (!res.ok) throw new Error("Failed to fetch transactions");
       const transactions = await res.json();
 
       const groupedData = transactions.reduce(
@@ -57,9 +58,17 @@ export default function ExpenseChart() {
       }));
 
       setData(completeData);
-    };
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
 
-    fetchTransactions();
+  useEffect(() => {
+    fetchTransactions(); 
+
+    const interval = setInterval(fetchTransactions, 5000); 
+
+    return () => clearInterval(interval); 
   }, []);
 
   return (
